@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import SplitType from "split-type";
+import { Floating3D } from "@/components/ui/Floating3D";
 
 export function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,9 +41,12 @@ export function Hero() {
         <div className="absolute top-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-rose-50 blur-3xl mix-blend-multiply" />
       </div>
 
+      <Floating3D />
+
       <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-8 md:gap-12">
-        <h1 className="split-text text-6xl md:text-8xl lg:text-[140px] font-medium tracking-tighter text-zinc-900 leading-[0.9] mb-6 md:mb-0">
-          Get well soon,<br/>Dora.
+        <h1 className="split-text text-5xl md:text-7xl lg:text-8xl font-light text-zinc-900 tracking-tight leading-[1.1] mb-6">
+          Get well soon, <br/>
+          <span className="font-outfit font-medium text-rose-500">Dora the Explorer.</span>
         </h1>
         
         <p className="split-text text-xl md:text-2xl font-light text-rose-400 max-w-sm leading-relaxed mb-2 md:mb-6">

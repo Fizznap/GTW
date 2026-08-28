@@ -7,11 +7,19 @@ export function PlaylistSection() {
   const tracks = [
     {
       id: "track-1",
-      url: "https://open.spotify.com/embed/track/3hoXhwP0ub9LdSJV4olDIc?utm_source=generator",
+      url: "https://open.spotify.com/embed/track/395gJWcJQK0C3GJfHAn7f6?utm_source=generator",
     },
     {
       id: "track-2",
-      url: "https://open.spotify.com/embed/track/395gJWcJQK0C3GJfHAn7f6?utm_source=generator",
+      url: "https://open.spotify.com/embed/track/3hoXhwP0ub9LdSJV4olDIc?utm_source=generator",
+    },
+    {
+      id: "track-3",
+      url: "https://open.spotify.com/embed/track/7eQl3Yqv35ioqUfveKHitE?utm_source=generator",
+    },
+    {
+      id: "track-4",
+      url: "https://open.spotify.com/embed/track/5a11x5PUFvJEadMRqtNtTr?utm_source=generator",
     },
   ];
 
