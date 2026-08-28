@@ -1,12 +1,12 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, Variants } from "framer-motion";
 import Image from "next/image";
 
 export function GallerySection() {
   const reduce = useReducedMotion();
 
-  const container = {
+  const container: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -14,7 +14,7 @@ export function GallerySection() {
     }
   };
 
-  const item = {
+  const item: Variants = {
     hidden: { opacity: 0, y: reduce ? 0 : 40 },
     show: { 
       opacity: 1, 
