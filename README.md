@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Only You — standalone romantic story route
 
-## Getting Started
+This folder adds a new page at **`/only-you`** to your existing Next.js project.
 
-First, run the development server:
+## Upload these files
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Copy the `src/app/only-you/` folder into your repository's existing `src/app/` folder. Do not replace your existing home page, `globals.css`, or `/secret` route.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Files:
+- `page.tsx` — route entry and metadata
+- `layout.tsx` — imports route-scoped styles
+- `OnlyYouExperience.tsx` — interactive five-chapter experience
+- `only-you.css` — responsive beige/rose styling
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Dependencies
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This implementation uses packages already present in the repository:
+- `framer-motion`
+- `lucide-react`
 
-## Learn More
+If either is missing, install it with `npm install framer-motion lucide-react`.
 
-To learn more about Next.js, take a look at the following resources:
+## Preview
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Run `npm run dev` and visit `http://localhost:3000/only-you`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Personalize before publishing
 
-## Deploy on Vercel
+1. Open `OnlyYouExperience.tsx`.
+2. Edit the `chapters` array to replace the sample story with your actual five-part confession.
+3. Replace the Spotify playlist ID in the iframe `src` with your own playlist or track embed ID.
+4. The Spotify player requires the visitor to press Play; browsers generally block autoplay.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The page is isolated under `/only-you` and does not alter the current root page or `/secret` flow.
