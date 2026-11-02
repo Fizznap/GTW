@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import OnlyYouExperience from "./OnlyYouExperience";
+import OnlyYouLetter from "./OnlyYouLetter";
 
 export const metadata: Metadata = {
-  title: "Only You — A little story",
-  description: "A little story, made with care.",
+  title: "A letter for you",
+  description: "Some things are better said from the heart.",
   robots: { index: false, follow: false },
 };
 
 export default function OnlyYouPage() {
-  return <OnlyYouExperience />;
+  return <OnlyYouLetter />;
 }
