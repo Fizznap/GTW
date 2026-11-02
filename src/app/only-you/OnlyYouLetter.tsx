@@ -1,10 +1,27 @@
  "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Heart, Music2, Pause, Play, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Heart, Music2, Pause, Play, Sparkles, Clock3 } from "lucide-react";
 
-const pages = [
+type LyricCue = { id: string; text: string };
+type LetterPage = {
+  date: string;
+  salutation: string;
+  paragraphs: string[];
+  songIndex: number;
+  cues: LyricCue[];
+};
+
+const songs = [
+  { title: "Tu Chahiye", artist: "Atif Aslam · Bajrangi Bhaijaan", src: "/audio/tu-chahiye.mp3" },
+  { title: "Saudebazi (Encore)", artist: "Javed Ali", src: "/audio/saudebazi-encore.mp3" },
+  { title: "Jag Ghoomeya", artist: "Rahat Fateh Ali Khan · Sultan", src: "/audio/jag-ghoomeya.mp3" },
+  { title: "Kinna Sona", artist: "Sunil Kamath · Bhaag Johnny", src: "/audio/kinna-sona.mp3" },
+  { title: "Tu Jaane Na", artist: "Atif Aslam", src: "/audio/tu-jaane-na.mp3" },
+];
+
+const pages: LetterPage[] = [
   {
     date: "A LITTLE CONFESSION",
     salutation: "Dear my favourite person,",
@@ -14,8 +31,12 @@ const pages = [
       "Har safar mein mujhe tu hi rahnuma chahiye,",
       "Jeene ko bas mujhe tu hi meherbaan chahiye.",
     ],
-    lyric: "Koi aur dooja kyun mujhe chahiye…",
-    song: "Tu Chahiye",
+    songIndex: 0,
+    cues: [
+      { id: "tu-1", text: "Koi aur dooja kyun mujhe chahiye, na tere siva chahiye." },
+      { id: "tu-2", text: "Har safar mein mujhe tu hi rahnuma chahiye." },
+      { id: "tu-3", text: "Jeene ko bas mujhe tu hi meherbaan chahiye." },
+    ],
   },
   {
     date: "A PRAYER I KEEP",
@@ -26,8 +47,11 @@ const pages = [
       "Har dua mein tujhko main maangu sada,",
       "Rab se hai har ghadi bas yahi iltija.",
     ],
-    lyric: "Har dua mein tujhko main maangu sada…",
-    song: "Saudebazi (Encore)",
+    songIndex: 1,
+    cues: [
+      { id: "sau-1", text: "Har dua mein tujhko main maangu sada." },
+      { id: "sau-2", text: "Rab se hai har ghadi bas yahi iltija." },
+    ],
   },
   {
     date: "NO ONE LIKE YOU",
@@ -36,8 +60,8 @@ const pages = [
       "No matter how many people I meet or how many places I go, I don't think I'll ever find someone like you.",
       "Jag Ghoomeya, thaare jaisa na koi. ❤️",
     ],
-    lyric: "Jag Ghoomeya, thaare jaisa na koi. ❤️",
-    song: "Jag Ghoomeya",
+    songIndex: 2,
+    cues: [{ id: "jag-1", text: "Jag Ghoomeya, thaare jaisa na koi. ❤️" }],
   },
   {
     date: "A PROMISE TO REMEMBER",
@@ -47,8 +71,11 @@ const pages = [
       "Main kabhi bhooloonga na tujhe, chahe tu mujhko dena bhula,",
       "Aadatein jaisi hai tu meri, aadatein kaise bhooloon bhala?",
     ],
-    lyric: "Aadatein jaisi hai tu meri…",
-    song: "Kinna Sona",
+    songIndex: 3,
+    cues: [
+      { id: "kinna-1", text: "Main kabhi bhooloonga na tujhe, chahe tu mujhko dena bhula." },
+      { id: "kinna-2", text: "Aadatein jaisi hai tu meri, aadatein kaise bhooloon bhala?" },
+    ],
   },
   {
     date: "IF DESTINY DECIDES",
@@ -58,8 +85,11 @@ const pages = [
       "Mil ke bhi hum na mile, tumse na jaane kyun,",
       "Milon ke hain faasle, tumse na jaane kyun.",
     ],
-    lyric: "Mil ke bhi hum na mile…",
-    song: "Tu Jaane Na",
+    songIndex: 4,
+    cues: [
+      { id: "tujaane-1", text: "Mil ke bhi hum na mile, tumse na jaane kyun." },
+      { id: "tujaane-2", text: "Milon ke hain faasle, tumse na jaane kyun." },
+    ],
   },
   {
     date: "ONE LAST THING",
@@ -68,34 +98,102 @@ const pages = [
       "I don't know what will happen tomorrow, but if I ever get to choose, I'll choose you.",
       "Every single time. ❤️",
     ],
-    lyric: "I'll choose you. Every single time. ❤️",
-    song: "All five songs, for you",
+    songIndex: 4,
+    cues: [],
   },
 ];
 
-const songs = [
-  { title: "Tu Chahiye", film: "Bajrangi Bhaijaan · Atif Aslam", video: "VmjynPkyLRQ", source: "YouTube" },
-  { title: "Kinna Sona", film: "Bhaag Johnny · Sunil Kamath", video: "XrjwsY-BFck", source: "T-Series" },
-  { title: "Jag Ghoomeya", film: "Sultan · Rahat Fateh Ali Khan", video: "t10sQb0Zmjs", source: "YRF" },
-  { title: "Saudebazi (Encore)", film: "Aakrosh · Javed Ali", video: "W4sHmzMCo8s", source: "YouTube" },
-  { title: "Tu Jaane Na", film: "Ajab Prem Ki Ghazab Kahani · Atif Aslam", video: "", source: "Tips Official search" },
-];
+const STORAGE_KEY = "only-you-lyric-cues-v1";
+
+function formatTime(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
 
 export default function OnlyYouLetter() {
   const [opened, setOpened] = useState(false);
   const [page, setPage] = useState(0);
   const [songIndex, setSongIndex] = useState(0);
-  const [playerVisible, setPlayerVisible] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [cues, setCues] = useState<Record<string, number>>({});
+  const [showCalibrator, setShowCalibrator] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const reduced = useReducedMotion();
   const current = pages[page];
   const activeSong = songs[songIndex];
-
-  const transition = reduced ? { duration: 0 } : { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const };
+  const pageSong = songs[current.songIndex];
+  const transition = reduced ? { duration: 0 } : { duration: .55, ease: [0.22, 1, .36, 1] as const };
   const progress = useMemo(() => `${((page + 1) / pages.length) * 100}%`, [page]);
 
-  function chooseSong(index: number) {
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      if (stored) setCues(JSON.parse(stored));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cues)); } catch {}
+  }, [cues]);
+
+  function loadSong(index: number, autoplay = false, seekTo = 0) {
+    const audio = audioRef.current;
     setSongIndex(index);
-    setPlayerVisible(true);
+    if (!audio) return;
+    const nextSrc = songs[index].src;
+    if (!audio.src.endsWith(nextSrc)) {
+      audio.src = nextSrc;
+      audio.load();
+    }
+    const seekAndPlay = () => {
+      audio.currentTime = seekTo;
+      setCurrentTime(seekTo);
+      if (autoplay) void audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+      else setPlaying(false);
+    };
+    if (audio.readyState >= 1) seekAndPlay();
+    else audio.addEventListener("loadedmetadata", seekAndPlay, { once: true });
+  }
+
+  function playCue(cueId: string) {
+    const time = cues[cueId];
+    if (typeof time !== "number") return;
+    loadSong(current.songIndex, true, time);
+  }
+
+  function markCue(cueId: string) {
+    const audio = audioRef.current;
+    if (!audio || audio.paused) return;
+    setCues((old) => ({ ...old, [cueId]: audio.currentTime }));
+  }
+
+  function selectPage(nextPage: number) {
+    setPage(nextPage);
+    const targetSong = pages[nextPage].songIndex;
+    if (targetSong !== songIndex) loadSong(targetSong, false, 0);
+  }
+
+  function togglePlayback() {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.paused) {
+      if (!audio.src || !audio.src.endsWith(activeSong.src)) loadSong(songIndex, true, currentTime);
+      else void audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    } else {
+      audio.pause();
+      setPlaying(false);
+    }
+  }
+
+  function seek(value: number) {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.currentTime = value;
+    setCurrentTime(value);
   }
 
   return (
@@ -105,7 +203,7 @@ export default function OnlyYouLetter() {
       <div className="l4u-sparkles" aria-hidden="true">
         {Array.from({ length: 18 }, (_, i) => <i key={i} style={{ left: `${(i * 37) % 100}%`, top: `${(i * 23) % 100}%`, animationDelay: `${(i % 7) * -.8}s` }} />)}
       </div>
-      <motion.div className="l4u-petal l4u-petal-a" aria-hidden="true" animate={reduced ? {} : { y: [0, -18, 0], rotate: [0, 14, 0] }} transition={{ duration: 7, repeat: Infinity }} >✿</motion.div>
+      <motion.div className="l4u-petal l4u-petal-a" aria-hidden="true" animate={reduced ? {} : { y: [0, -18, 0], rotate: [0, 14, 0] }} transition={{ duration: 7, repeat: Infinity }}>✿</motion.div>
       <motion.div className="l4u-petal l4u-petal-b" aria-hidden="true" animate={reduced ? {} : { y: [0, 15, 0], rotate: [0, -18, 0] }} transition={{ duration: 9, repeat: Infinity }}>✿</motion.div>
 
       <header className="l4u-header">
@@ -135,13 +233,18 @@ export default function OnlyYouLetter() {
                 <div className="l4u-paper-rule" />
                 <h2>{current.salutation}</h2>
                 <div className="l4u-paragraphs">
-                  {current.paragraphs.map((paragraph, i) => (
-                    <motion.p key={`${page}-${i}`} initial={reduced ? false : { opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduced ? 0 : .16 + i * .13, duration: .45 }}>{paragraph}</motion.p>
-                  ))}
+                  {current.paragraphs.map((paragraph, i) => <motion.p key={`${page}-${i}`} initial={reduced ? false : { opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduced ? 0 : .16 + i * .13, duration: .45 }}>{paragraph}</motion.p>)}
                 </div>
-                <div className="l4u-lyric-ornament">
-                  <span>♪</span><em>{current.lyric}</em><span>♪</span>
-                </div>
+                {current.cues.length > 0 && (
+                  <div className="l4u-inline-cues">
+                    {current.cues.map((cue) => (
+                      <div className="l4u-inline-cue" key={cue.id}>
+                        <span>♪</span><em>{cue.text}</em>
+                        <button title={cues[cue.id] === undefined ? "Set timestamp in music panel below" : `Play from ${formatTime(cues[cue.id])}`} onClick={() => playCue(cue.id)} disabled={cues[cue.id] === undefined}><Play size={13} /></button>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div className="l4u-paper-signoff"><span>With love,</span><strong>Me ♡</strong></div>
                 <div className="l4u-paper-flower" aria-hidden="true">✿</div>
               </motion.article>
@@ -150,9 +253,9 @@ export default function OnlyYouLetter() {
           <div className="l4u-controls">
             <div className="l4u-progress"><span style={{ width: progress }} /></div>
             <div className="l4u-control-row">
-              <button className="l4u-text-button" onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0}><ArrowLeft size={15} /> Back</button>
+              <button className="l4u-text-button" onClick={() => selectPage(Math.max(0, page - 1))} disabled={page === 0}><ArrowLeft size={15} /> Back</button>
               <span className="l4u-counter">{String(page + 1).padStart(2, "0")} <i>—</i> 06</span>
-              {page < pages.length - 1 ? <button className="l4u-button l4u-next" onClick={() => setPage((p) => Math.min(p + 1, pages.length - 1))}>Next page <ArrowRight size={15} /></button> : <button className="l4u-button l4u-next" onClick={() => document.getElementById("our-songs")?.scrollIntoView({ behavior: "smooth" })}>Our songs <Music2 size={15} /></button>}
+              {page < pages.length - 1 ? <button className="l4u-button l4u-next" onClick={() => selectPage(page + 1)}>Next page <ArrowRight size={15} /></button> : <button className="l4u-button l4u-next" onClick={() => document.getElementById("our-songs")?.scrollIntoView({ behavior: "smooth" })}>Our songs <Music2 size={15} /></button>}
             </div>
           </div>
         </section>
@@ -162,43 +265,66 @@ export default function OnlyYouLetter() {
         <div className="l4u-music-heading">
           <span className="l4u-section-kicker"><Music2 size={14} /> THE SOUNDTRACK</span>
           <h2>Five songs.<br /><em>One feeling.</em></h2>
-          <p>These songs hold little pieces of what I wanted to say.</p>
+          <p>Play the recording, mark each lyric as it begins, then replay any line with one tap.</p>
         </div>
         <div className="l4u-song-area">
           <div className="l4u-song-list">
             {songs.map((song, index) => (
-              <button key={song.title} className={`l4u-song-row ${songIndex === index ? "selected" : ""}`} onClick={() => chooseSong(index)}>
+              <button key={song.title} className={`l4u-song-row ${songIndex === index ? "selected" : ""}`} onClick={() => loadSong(index, false, 0)}>
                 <span className="l4u-song-number">0{index + 1}</span>
-                <span className="l4u-song-meta"><strong>{song.title}</strong><small>{song.film}</small></span>
-                <span className="l4u-song-play">{songIndex === index && playerVisible ? <Pause size={15} /> : <Play size={15} />}</span>
+                <span className="l4u-song-meta"><strong>{song.title}</strong><small>{song.artist}</small></span>
+                <span className="l4u-song-play">{songIndex === index && playing ? <Pause size={15} /> : <Play size={15} />}</span>
               </button>
             ))}
           </div>
           <div className="l4u-player-card">
-            <div className="l4u-record"><div className="l4u-record-center">♡</div></div>
-            <span className="l4u-player-label">NOW PLAYING</span>
+            <div className={`l4u-record ${playing ? "is-playing" : ""}`}><div className="l4u-record-center">♡</div></div>
+            <span className="l4u-player-label">NOW SELECTED</span>
             <h3>{activeSong.title}</h3>
-            <p>{activeSong.film}</p>
-            {playerVisible && activeSong.video ? (
-              <div className="l4u-embed"><iframe title={`${activeSong.title} official music video`} src={`https://www.youtube-nocookie.com/embed/${activeSong.video}?autoplay=1&rel=0`} allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen /></div>
-            ) : (
-              <div className="l4u-player-placeholder">
-                <p>{playerVisible ? "Open the official song search to play this track." : "Choose a song to start listening."}</p>
-                {playerVisible && <a className="l4u-external" href="https://www.youtube.com/results?search_query=Tu+Jaane+Na+Atif+Aslam+Tips+Official" target="_blank" rel="noreferrer">Find Tu Jaane Na on YouTube <ArrowRight size={14} /></a>}
+            <p>{activeSong.artist}</p>
+            <audio
+              ref={audioRef}
+              src={activeSong.src}
+              preload="metadata"
+              onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
+              onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)}
+              onPlay={() => setPlaying(true)}
+              onPause={() => setPlaying(false)}
+              onEnded={() => setPlaying(false)}
+            />
+            <div className="l4u-audio-controls">
+              <button className="l4u-round-play" onClick={togglePlayback} aria-label={playing ? "Pause" : "Play"}>{playing ? <Pause size={18} /> : <Play size={18} />}</button>
+              <div className="l4u-timebar">
+                <input aria-label="Seek audio" type="range" min="0" max={duration || 1} step=".1" value={Math.min(currentTime, duration || 0)} onChange={(e) => seek(Number(e.target.value))} />
+                <div><span>{formatTime(currentTime)}</span><span>{formatTime(duration)}</span></div>
+              </div>
+            </div>
+            <button className="l4u-calibrate-toggle" onClick={() => setShowCalibrator((v) => !v)}><Clock3 size={14} /> {showCalibrator ? "Hide lyric timestamp setup" : "Set exact lyric timestamps"}</button>
+            {showCalibrator && (
+              <div className="l4u-calibrator">
+                <p>Play the song. When a displayed line begins, tap <strong>Mark this moment</strong>. The time is saved in this browser.</p>
+                {pages.filter((p) => p.songIndex === songIndex).flatMap((p) => p.cues).map((cue) => (
+                  <div className="l4u-calibration-row" key={cue.id}>
+                    <span>{cue.text}</span>
+                    <button onClick={() => markCue(cue.id)} disabled={!playing}>Mark this moment</button>
+                    <small>{cues[cue.id] === undefined ? "Not set" : formatTime(cues[cue.id])}</small>
+                  </div>
+                ))}
+                <button className="l4u-clear-cues" onClick={() => setCues((old) => {
+                  const next = { ...old };
+                  pages.filter((p) => p.songIndex === songIndex).flatMap((p) => p.cues).forEach((cue) => delete next[cue.id]);
+                  return next;
+                })}>Clear timings for this song</button>
               </div>
             )}
-            <span className="l4u-player-foot">Playback is provided by YouTube's official/label uploads.</span>
+            <span className="l4u-player-foot">Your uploaded MP3 files are played locally by this page. Playback begins after you press Play.</span>
           </div>
         </div>
-        <p className="l4u-lyric-note">Your quoted lyric lines appear inside the letter. Full commercial song lyrics and audio remain with their respective rights holders.</p>
+        <p className="l4u-lyric-note">Timestamp setup is stored in this browser. After setting the cues, lyric play buttons on the letter will jump to those exact saved positions.</p>
       </section>
 
       <footer className="l4u-footer">
-        <span>✿</span>
-        <p>And if I ever get to choose…</p>
-        <h2>I'll choose <em>you.</em></h2>
-        <strong>Every single time. ❤️</strong>
-        <small>THE END · BUT NOT THE FEELING</small>
+        <span>✿</span><p>And if I ever get to choose…</p><h2>I'll choose <em>you.</em></h2><strong>Every single time. ❤️</strong><small>THE END · BUT NOT THE FEELING</small>
       </footer>
     </main>
   );
