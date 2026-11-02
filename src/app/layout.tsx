@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Caveat } from "next/font/google";
 import "./globals.css";
 import { Preloader } from "@/components/ui/Preloader";
+import { Analytics } from "@vercel/analytics/next";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function RootLayout({
       >
         <Preloader />
         {children}
+        <Analytics />
       </body>
     </html>
   );
