@@ -143,6 +143,7 @@ export default function OnlyYouLetter() {
   const [audioError, setAudioError] = useState("");
   const [audioNotice, setAudioNotice] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
+  const pendingSeekRef = useRef<{ songIndex: number; time: number; autoplay: boolean } | null>(null);
   const reduced = useReducedMotion();
   const current = pages[page];
   const activeSong = songs[songIndex];
@@ -163,38 +164,68 @@ export default function OnlyYouLetter() {
     try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cues)); } catch {}
   }, [cues]);
 
+  function applyPendingSeek(audio: HTMLAudioElement) {
+    const pending = pendingSeekRef.current;
+    if (!pending || audio.readyState < 1) return;
+    const expectedPath = songs[pending.songIndex].src;
+    if (!audio.currentSrc.endsWith(expectedPath)) return;
+
+    pendingSeekRef.current = null;
+    const safeTime = Math.max(0, Math.min(pending.time, Number.isFinite(audio.duration) ? audio.duration : pending.time));
+    try {
+      audio.currentTime = safeTime;
+      setCurrentTime(safeTime);
+      setDuration(audio.duration || 0);
+    } catch {
+      setAudioError("The browser could not seek in this audio file. Try pressing the lyric button again.");
+      return;
+    }
+
+    if (pending.autoplay) {
+      void audio.play()
+        .then(() => { setPlaying(true); setAudioError(""); })
+        .catch((error) => {
+          setPlaying(false);
+          setAudioError(error?.message || "Playback was blocked. Tap Play again.");
+        });
+    } else {
+      setPlaying(false);
+    }
+  }
+
   function loadSong(index: number, autoplay = false, seekTo = 0) {
     const audio = audioRef.current;
+    const target = songs[index];
     setSongIndex(index);
+    setAudioError("");
+    setAudioNotice("");
+    setCurrentTime(seekTo);
+    pendingSeekRef.current = { songIndex: index, time: seekTo, autoplay };
+
     if (!audio) return;
-    const nextSrc = songs[index].src;
-    if (!audio.src.endsWith(nextSrc)) {
-      audio.src = nextSrc;
-      audio.load();
+
+    const targetPath = target.src;
+    const alreadyLoaded = audio.currentSrc.endsWith(targetPath) && audio.readyState >= 1;
+
+    if (alreadyLoaded) {
+      audio.pause();
+      applyPendingSeek(audio);
+      return;
     }
-    const seekAndPlay = () => {
-      audio.currentTime = seekTo;
-      setCurrentTime(seekTo);
-      setAudioError("");
-      if (autoplay) {
-        void audio.play()
-          .then(() => { setPlaying(true); setAudioError(""); })
-          .catch((error) => {
-            setPlaying(false);
-            setAudioError(error?.message || "Playback was blocked. Tap Play again.");
-          });
-      } else {
-        setPlaying(false);
-      }
-    };
-    if (audio.readyState >= 1) seekAndPlay();
-    else audio.addEventListener("loadedmetadata", seekAndPlay, { once: true });
+
+    // The audio element is intentionally uncontrolled: do not also pass a React `src` prop.
+    // This prevents a stale render from swapping a newly selected MP3 back to the previous track.
+    audio.pause();
+    audio.removeAttribute("src");
+    audio.load();
+    audio.src = targetPath;
+    audio.load();
   }
 
   function playCue(cueId: string) {
     const time = cues[cueId];
     if (typeof time === "number") {
-      setAudioNotice(`Playing from saved lyric timestamp ${formatTime(time)}.`);
+      setAudioNotice(`${songs[current.songIndex].title} · starting at ${formatTime(time)}.`);
       loadSong(current.songIndex, true, time);
     } else {
       setAudioNotice("This lyric has no timestamp yet. Starting the song from the beginning; use “Set exact lyric timestamps” while it plays to mark this line.");
@@ -219,13 +250,28 @@ export default function OnlyYouLetter() {
   function togglePlayback() {
     const audio = audioRef.current;
     if (!audio) return;
-    if (audio.paused) {
-      if (!audio.src || !audio.src.endsWith(activeSong.src)) loadSong(songIndex, true, currentTime);
-      else void audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-    } else {
+    if (!audio.paused) {
       audio.pause();
       setPlaying(false);
+      return;
     }
+
+    if (!audio.currentSrc.endsWith(activeSong.src)) {
+      loadSong(songIndex, true, currentTime);
+      return;
+    }
+
+    if (pendingSeekRef.current) {
+      applyPendingSeek(audio);
+      return;
+    }
+
+    void audio.play()
+      .then(() => { setPlaying(true); setAudioError(""); })
+      .catch((error) => {
+        setPlaying(false);
+        setAudioError(error?.message || "Playback was blocked. Tap Play again.");
+      });
   }
 
   function seek(value: number) {
@@ -323,13 +369,16 @@ export default function OnlyYouLetter() {
             <p>{activeSong.artist}</p>
             <audio
               ref={audioRef}
-              src={activeSong.src}
               preload="metadata"
               onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
-              onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)}
+              onLoadedMetadata={(event) => {
+                setDuration(event.currentTarget.duration || 0);
+                applyPendingSeek(event.currentTarget);
+              }}
               onPlay={() => setPlaying(true)}
               onPause={() => setPlaying(false)}
               onEnded={() => setPlaying(false)}
+              onSeeked={(event) => setCurrentTime(event.currentTarget.currentTime)}
               onError={() => {
                 setPlaying(false);
                 setAudioError(`Couldn't load ${activeSong.src}. Check that this MP3 exists in the deployed public/audio folder.`);
