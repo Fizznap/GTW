@@ -58,10 +58,20 @@ const pages: LetterPage[] = [
     salutation: "And honestly,",
     paragraphs: [
       "No matter how many people I meet or how many places I go, I don't think I'll ever find someone like you.",
-      "Jag Ghoomeya, thaare jaisa na koi. ❤️",
+      "Na wo akhiyan ruhani kahin,",
+      "Na wo chehra noorani kahin,",
+      "Kahin dil wali baatein bhi na,",
+      "Na wo sajri jawani kahin,",
+      "Jag ghoomeya thaare jaisa na koi. ❤️",
     ],
     songIndex: 2,
-    cues: [{ id: "jag-1", text: "Jag Ghoomeya, thaare jaisa na koi. ❤️" }],
+    cues: [
+      { id: "jag-1", text: "Na wo akhiyan ruhani kahin" },
+      { id: "jag-2", text: "Na wo chehra noorani kahin" },
+      { id: "jag-3", text: "Kahin dil wali baatein bhi na" },
+      { id: "jag-4", text: "Na wo sajri jawani kahin" },
+      { id: "jag-5", text: "Jag ghoomeya thaare jaisa na koi. ❤️" },
+    ],
   },
   {
     date: "A PROMISE TO REMEMBER",
@@ -105,6 +115,15 @@ const pages: LetterPage[] = [
 
 const STORAGE_KEY = "only-you-lyric-cues-v1";
 
+// User-provided start points (seconds) for the first lyric cue of each song.
+const DEFAULT_CUE_TIMES: Record<string, number> = {
+  "tu-1": 110,       // Tu Chahiye — 01:50
+  "sau-1": 244,      // Saudebazi (Encore) — 04:04
+  "jag-1": 35,       // Jag Ghoomeya — 00:35
+  "kinna-1": 230,    // Kinna Sona — 03:50
+  "tujaane-1": 32,   // Tu Jaane Na — 00:32
+};
+
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
   const mins = Math.floor(seconds / 60);
@@ -121,6 +140,8 @@ export default function OnlyYouLetter() {
   const [duration, setDuration] = useState(0);
   const [cues, setCues] = useState<Record<string, number>>({});
   const [showCalibrator, setShowCalibrator] = useState(false);
+  const [audioError, setAudioError] = useState("");
+  const [audioNotice, setAudioNotice] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
   const reduced = useReducedMotion();
   const current = pages[page];
@@ -132,7 +153,9 @@ export default function OnlyYouLetter() {
   useEffect(() => {
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored) setCues(JSON.parse(stored));
+      const saved = stored ? JSON.parse(stored) : {};
+      // Explicit timestamps supplied by the user take precedence over older saved values.
+      setCues({ ...saved, ...DEFAULT_CUE_TIMES });
     } catch {}
   }, []);
 
@@ -152,8 +175,17 @@ export default function OnlyYouLetter() {
     const seekAndPlay = () => {
       audio.currentTime = seekTo;
       setCurrentTime(seekTo);
-      if (autoplay) void audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-      else setPlaying(false);
+      setAudioError("");
+      if (autoplay) {
+        void audio.play()
+          .then(() => { setPlaying(true); setAudioError(""); })
+          .catch((error) => {
+            setPlaying(false);
+            setAudioError(error?.message || "Playback was blocked. Tap Play again.");
+          });
+      } else {
+        setPlaying(false);
+      }
     };
     if (audio.readyState >= 1) seekAndPlay();
     else audio.addEventListener("loadedmetadata", seekAndPlay, { once: true });
@@ -161,8 +193,15 @@ export default function OnlyYouLetter() {
 
   function playCue(cueId: string) {
     const time = cues[cueId];
-    if (typeof time !== "number") return;
-    loadSong(current.songIndex, true, time);
+    if (typeof time === "number") {
+      setAudioNotice(`Playing from saved lyric timestamp ${formatTime(time)}.`);
+      loadSong(current.songIndex, true, time);
+    } else {
+      setAudioNotice("This lyric has no timestamp yet. Starting the song from the beginning; use “Set exact lyric timestamps” while it plays to mark this line.");
+      setShowCalibrator(true);
+      loadSong(current.songIndex, true, 0);
+      window.setTimeout(() => document.getElementById("our-songs")?.scrollIntoView({ behavior: "smooth", block: "center" }), 250);
+    }
   }
 
   function markCue(cueId: string) {
@@ -240,7 +279,7 @@ export default function OnlyYouLetter() {
                     {current.cues.map((cue) => (
                       <div className="l4u-inline-cue" key={cue.id}>
                         <span>♪</span><em>{cue.text}</em>
-                        <button title={cues[cue.id] === undefined ? "Set timestamp in music panel below" : `Play from ${formatTime(cues[cue.id])}`} onClick={() => playCue(cue.id)} disabled={cues[cue.id] === undefined}><Play size={13} /></button>
+                        <button title={cues[cue.id] === undefined ? "Play song and set this lyric timestamp" : `Play from ${formatTime(cues[cue.id])}`} onClick={() => playCue(cue.id)}><Play size={13} /></button>
                       </div>
                     ))}
                   </div>
@@ -291,7 +330,14 @@ export default function OnlyYouLetter() {
               onPlay={() => setPlaying(true)}
               onPause={() => setPlaying(false)}
               onEnded={() => setPlaying(false)}
+              onError={() => {
+                setPlaying(false);
+                setAudioError(`Couldn't load ${activeSong.src}. Check that this MP3 exists in the deployed public/audio folder.`);
+              }}
+              onCanPlay={() => setAudioError("")}
             />
+            {audioError && <p className="l4u-audio-error" role="alert">{audioError}</p>}
+            {audioNotice && <p className="l4u-audio-notice" role="status">{audioNotice}</p>}
             <div className="l4u-audio-controls">
               <button className="l4u-round-play" onClick={togglePlayback} aria-label={playing ? "Pause" : "Play"}>{playing ? <Pause size={18} /> : <Play size={18} />}</button>
               <div className="l4u-timebar">
@@ -326,6 +372,24 @@ export default function OnlyYouLetter() {
       <footer className="l4u-footer">
         <span>✿</span><p>And if I ever get to choose…</p><h2>I'll choose <em>you.</em></h2><strong>Every single time. ❤️</strong><small>THE END · BUT NOT THE FEELING</small>
       </footer>
+
+      <aside className="l4u-mini-player" aria-label="Persistent music player">
+        <div className="l4u-mini-disc"><span>♡</span></div>
+        <div className="l4u-mini-meta">
+          <strong>{activeSong.title}</strong>
+          <small>{activeSong.artist}</small>
+        </div>
+        <button className="l4u-mini-toggle" onClick={togglePlayback} aria-label={playing ? "Pause music" : "Play music"}>
+          {playing ? <Pause size={17} /> : <Play size={17} />}
+        </button>
+        <div className="l4u-mini-timeline">
+          <input aria-label="Mini player seek" type="range" min="0" max={duration || 1} step=".1" value={Math.min(currentTime, duration || 0)} onChange={(e) => seek(Number(e.target.value))} />
+          <div><span>{formatTime(currentTime)}</span><span>{formatTime(duration)}</span></div>
+        </div>
+        <button className="l4u-mini-song" onClick={() => document.getElementById("our-songs")?.scrollIntoView({ behavior: "smooth" })} aria-label="Open song list">
+          <Music2 size={16} />
+        </button>
+      </aside>
     </main>
   );
 }
