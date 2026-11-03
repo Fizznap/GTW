@@ -1,0 +1,56 @@
+.number-page {
+  --number-ink: #2f2a28;
+  --number-muted: #857d78;
+  --number-rose: #be8188;
+  min-height: 100svh;
+  overflow: hidden;
+  color: var(--number-ink);
+  background: radial-gradient(ellipse at 50% 50%, #fff 0%, #fff 34%, transparent 73%), #faf9f7;
+  font-family: var(--font-outfit), sans-serif;
+}
+.number-header { position: relative; z-index: 2; min-height: 76px; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(20px, 6vw, 88px); border-bottom: 1px solid #ece9e6; }
+.number-wordmark, .number-back { color: #4e4947; text-decoration: none; }
+.number-wordmark { display: inline-flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.number-wordmark span { color: var(--number-rose); font-size: 22px; }
+.number-back { color: var(--number-muted); font-size: 12px; }
+.number-back span { margin-left: 5px; color: var(--number-rose); }
+.number-main { position: relative; min-height: calc(100svh - 76px); display: flex; flex-direction: column; align-items: center; padding: 58px 22px 76px; text-align: center; }
+.number-eyebrow { display: flex; align-items: center; gap: 9px; color: #938b86; font-size: 9px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; animation: number-appear .8s both; }
+.number-eyebrow span { color: var(--number-rose); font-size: 16px; }
+.number-main h1 { margin-top: 18px; font-family: Georgia, "Times New Roman", serif; font-size: clamp(47px, 7vw, 76px); font-weight: 400; letter-spacing: -.055em; line-height: .98; animation: number-appear .8s .08s both; }
+.number-main h1 em { color: var(--number-rose); font-weight: 400; }
+.number-story { display: flex; align-items: center; justify-content: center; gap: clamp(22px, 6vw, 75px); margin-top: 38px; animation: number-appear .8s .16s both; }
+.number-date-card { width: clamp(112px, 18vw, 174px); display: flex; flex-direction: column; align-items: center; padding: 18px 12px 15px; border: 1px solid #ece6e1; border-radius: 3px; background: rgb(255 255 255 / 85%); box-shadow: 0 8px 26px rgb(74 61 56 / 4%); }
+.number-label { color: #a19690; font-size: 8px; font-weight: 600; letter-spacing: .2em; }
+.number-digit { margin-top: 3px; color: #39312e; font-family: Georgia, "Times New Roman", serif; font-size: clamp(43px, 7vw, 67px); font-weight: 400; line-height: 1.1; }
+.number-caption { margin-top: 5px; color: #938b86; font-family: Georgia, "Times New Roman", serif; font-size: 11px; font-style: italic; }
+.number-join { color: #d4bdba; font-family: Georgia, serif; font-size: 28px; }
+.number-result { display: flex; flex-direction: column; align-items: center; margin-top: 25px; animation: number-appear .8s .24s both; }
+.number-result > span { color: #aaa19a; font-size: 8px; letter-spacing: .22em; text-transform: uppercase; }
+.number-result strong { margin-top: 3px; color: #403734; font-family: Georgia, "Times New Roman", serif; font-size: clamp(48px, 8vw, 72px); font-weight: 400; letter-spacing: .05em; line-height: 1; }
+.number-result strong span { color: var(--number-rose); }
+.number-message { max-width: 500px; margin-top: 22px; color: #77716d; font-family: Georgia, "Times New Roman", serif; font-size: 15px; line-height: 1.8; animation: number-appear .8s .32s both; }
+.number-signoff { margin-top: 15px; color: #665e5a; font-family: var(--font-caveat), cursive; font-size: 21px; animation: number-appear .8s .36s both; }
+.number-signoff span { color: var(--number-rose); }
+.number-cta { display: inline-flex; align-items: center; gap: 15px; margin-top: 25px; padding: 12px 20px; border: 1px solid #e7d7d5; border-radius: 999px; color: #554947; background: #fff; box-shadow: 0 5px 16px rgb(86 66 63 / 5%); font-size: 11px; text-decoration: none; transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease; animation: number-appear .8s .4s both; }
+.number-cta:hover { transform: translateY(-2px); border-color: #d8b4b5; box-shadow: 0 9px 22px rgb(86 66 63 / 9%); }
+.number-cta span { color: var(--number-rose); font-size: 16px; }
+.number-footnote { position: absolute; right: 22px; bottom: 24px; color: #aaa29d; font-size: 8px; letter-spacing: .18em; text-transform: uppercase; }
+.number-orb { position: absolute; top: 40%; left: 50%; width: min(58vw, 650px); aspect-ratio: 1; border: 1px solid rgb(190 129 136 / 8%); border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); animation: number-breathe 8s ease-in-out infinite alternate; }
+.number-orb-two { width: min(39vw, 440px); border-color: rgb(190 129 136 / 10%); animation-delay: -3s; }
+@keyframes number-appear { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes number-breathe { from { opacity: .4; scale: .985; } to { opacity: .9; scale: 1.015; } }
+@media (max-width: 600px) {
+  .number-header { min-height: 64px; padding-inline: 17px; }
+  .number-main { min-height: calc(100svh - 64px); padding: 55px 18px 70px; }
+  .number-main h1 { font-size: clamp(45px, 12vw, 64px); }
+  .number-story { gap: 12px; margin-top: 32px; }
+  .number-date-card { width: min(35vw, 145px); padding: 15px 8px 13px; }
+  .number-caption { font-size: 10px; }
+  .number-message { font-size: 14px; }
+  .number-orb { top: 28%; left: 82%; width: 90vw; opacity: .6; }
+  .number-orb-two { width: 64vw; }
+  .number-footnote { right: 10px; bottom: 15px; font-size: 7px; }
+}
+@media (max-width: 360px) { .number-back { font-size: 10px; } }
+@media (prefers-reduced-motion: reduce) { .number-eyebrow, .number-main h1, .number-story, .number-result, .number-message, .number-signoff, .number-cta, .number-orb { animation: none; } }

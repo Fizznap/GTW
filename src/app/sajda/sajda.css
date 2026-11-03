@@ -90,6 +90,8 @@
   font-size: 22px;
 }
 .sajda-signoff span { color: var(--sajda-rose); }
+.sajda-number-link { display: inline-flex; gap: 7px; margin-top: 19px; color: #756c68; font-size: 11px; text-decoration-color: #d8c4c2; text-underline-offset: 4px; }
+.sajda-number-link span { color: var(--sajda-rose); }
 
 .sajda-song {
   position: relative;

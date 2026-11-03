@@ -30,6 +30,7 @@ export default function SajdaPage() {
             and somehow, every time, they find their way back to you.
           </p>
           <p className="sajda-signoff">This one always makes me think of you. <span aria-hidden="true">♡</span></p>
+          <Link className="sajda-number-link" href="/2325">A tiny number, just for us <span aria-hidden="true">↗</span></Link>
         </div>
         <div className="sajda-song" aria-label="Listen to Sajdaa on Spotify">
           <div className="sajda-song-heading">
