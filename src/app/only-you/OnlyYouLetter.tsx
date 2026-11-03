@@ -27,6 +27,9 @@ const pages: LetterPage[] = [
     salutation: "Dear my favourite person,",
     paragraphs: [
       "If you ever say that the girl who will marry me will be so lucky, I'll tell you one thing…",
+      "Koi aur dooja kyun mujhe chahiye, na tere siva chahiye.",
+      "Har safar mein mujhe tu hi rahnuma chahiye,",
+      "Jeene ko bas mujhe tu hi meherbaan chahiye.",
     ],
     songIndex: 0,
     cues: [
@@ -41,6 +44,8 @@ const pages: LetterPage[] = [
     paragraphs: [
       "You know, I always pray to God for just one thing: that someday you will be mine.",
       "I don't know what the future holds, but I really wish I get to spend my life with you.",
+      "Har dua mein tujhko main maangu sada,",
+      "Rab se hai har ghadi bas yahi iltija.",
     ],
     songIndex: 1,
     cues: [
@@ -53,6 +58,11 @@ const pages: LetterPage[] = [
     salutation: "And honestly,",
     paragraphs: [
       "No matter how many people I meet or how many places I go, I don't think I'll ever find someone like you.",
+      "Na wo akhiyan ruhani kahin,",
+      "Na wo chehra noorani kahin,",
+      "Kahin dil wali baatein bhi na,",
+      "Na wo sajri jawani kahin,",
+      "Jag ghoomeya thaare jaisa na koi. ❤️",
     ],
     songIndex: 2,
     cues: [
@@ -68,6 +78,8 @@ const pages: LetterPage[] = [
     salutation: "Even if someday,",
     paragraphs: [
       "Even if someday you forget me, I don't think I'll ever be able to forget you.",
+      "Main kabhi bhooloonga na tujhe, chahe tu mujhko dena bhula,",
+      "Aadatein jaisi hai tu meri, aadatein kaise bhooloon bhala?",
     ],
     songIndex: 3,
     cues: [
@@ -80,6 +92,8 @@ const pages: LetterPage[] = [
     salutation: "And if destiny still keeps us apart,",
     paragraphs: [
       "Even after bringing us together…",
+      "Mil ke bhi hum na mile, tumse na jaane kyun,",
+      "Milon ke hain faasle, tumse na jaane kyun.",
     ],
     songIndex: 4,
     cues: [
