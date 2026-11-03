@@ -27,9 +27,6 @@ const pages: LetterPage[] = [
     salutation: "Dear my favourite person,",
     paragraphs: [
       "If you ever say that the girl who will marry me will be so lucky, I'll tell you one thing…",
-      "Koi aur dooja kyun mujhe chahiye, na tere siva chahiye.",
-      "Har safar mein mujhe tu hi rahnuma chahiye,",
-      "Jeene ko bas mujhe tu hi meherbaan chahiye.",
     ],
     songIndex: 0,
     cues: [
@@ -44,8 +41,6 @@ const pages: LetterPage[] = [
     paragraphs: [
       "You know, I always pray to God for just one thing: that someday you will be mine.",
       "I don't know what the future holds, but I really wish I get to spend my life with you.",
-      "Har dua mein tujhko main maangu sada,",
-      "Rab se hai har ghadi bas yahi iltija.",
     ],
     songIndex: 1,
     cues: [
@@ -58,11 +53,6 @@ const pages: LetterPage[] = [
     salutation: "And honestly,",
     paragraphs: [
       "No matter how many people I meet or how many places I go, I don't think I'll ever find someone like you.",
-      "Na wo akhiyan ruhani kahin,",
-      "Na wo chehra noorani kahin,",
-      "Kahin dil wali baatein bhi na,",
-      "Na wo sajri jawani kahin,",
-      "Jag ghoomeya thaare jaisa na koi. ❤️",
     ],
     songIndex: 2,
     cues: [
@@ -78,8 +68,6 @@ const pages: LetterPage[] = [
     salutation: "Even if someday,",
     paragraphs: [
       "Even if someday you forget me, I don't think I'll ever be able to forget you.",
-      "Main kabhi bhooloonga na tujhe, chahe tu mujhko dena bhula,",
-      "Aadatein jaisi hai tu meri, aadatein kaise bhooloon bhala?",
     ],
     songIndex: 3,
     cues: [
@@ -92,8 +80,6 @@ const pages: LetterPage[] = [
     salutation: "And if destiny still keeps us apart,",
     paragraphs: [
       "Even after bringing us together…",
-      "Mil ke bhi hum na mile, tumse na jaane kyun,",
-      "Milon ke hain faasle, tumse na jaane kyun.",
     ],
     songIndex: 4,
     cues: [
@@ -144,19 +130,23 @@ export default function OnlyYouLetter() {
   const [opened, setOpened] = useState(false);
   const [page, setPage] = useState(0);
   const [songIndex, setSongIndex] = useState(0);
+  const [loadedSongIndex, setLoadedSongIndex] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [cues, setCues] = useState<Record<string, number>>({});
   const [showCalibrator, setShowCalibrator] = useState(false);
   const [audioError, setAudioError] = useState("");
-  const [audioNotice, setAudioNotice] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
   const pendingSeekRef = useRef<{ songIndex: number; time: number; autoplay: boolean } | null>(null);
   const reduced = useReducedMotion();
   const current = pages[page];
   const activeSong = songs[songIndex];
   const pageSong = songs[current.songIndex];
+  const pageSongLoaded = loadedSongIndex === current.songIndex;
+  const pageSongPlaying = pageSongLoaded && songIndex === current.songIndex && playing;
+  const letterTime = pageSongLoaded ? currentTime : 0;
+  const letterDuration = pageSongLoaded ? duration : 0;
   const transition = reduced ? { duration: 0 } : { duration: .55, ease: [0.22, 1, .36, 1] as const };
   const progress = useMemo(() => `${((page + 1) / pages.length) * 100}%`, [page]);
 
@@ -205,8 +195,8 @@ export default function OnlyYouLetter() {
     const audio = audioRef.current;
     const target = songs[index];
     setSongIndex(index);
+    setLoadedSongIndex(index);
     setAudioError("");
-    setAudioNotice("");
     setCurrentTime(seekTo);
     pendingSeekRef.current = { songIndex: index, time: seekTo, autoplay };
 
@@ -221,6 +211,8 @@ export default function OnlyYouLetter() {
       return;
     }
 
+    setDuration(0);
+
     // The audio element is intentionally uncontrolled: do not also pass a React `src` prop.
     // This prevents a stale render from swapping a newly selected MP3 back to the previous track.
     audio.pause();
@@ -228,21 +220,6 @@ export default function OnlyYouLetter() {
     audio.load();
     audio.src = targetPath;
     audio.load();
-  }
-
-  function playCue(cueId: string) {
-    const exactTime = cues[cueId];
-    const time = typeof exactTime === "number" ? exactTime : SONG_START_TIMES[current.songIndex];
-    if (typeof exactTime === "number") {
-      setAudioNotice(`${songs[current.songIndex].title} · starting at ${formatTime(time)}.`);
-    } else {
-      setAudioNotice(`This line has no exact timestamp saved yet. Starting at the song’s opening cue, ${formatTime(time)}. Use “Set exact lyric timestamps” to mark this line.`);
-      setShowCalibrator(true);
-      loadSong(current.songIndex, true, time);
-      window.setTimeout(() => document.getElementById("our-songs")?.scrollIntoView({ behavior: "smooth", block: "center" }), 250);
-      return;
-    }
-    loadSong(current.songIndex, true, time);
   }
 
   function markCue(cueId: string) {
@@ -263,6 +240,14 @@ export default function OnlyYouLetter() {
       return;
     }
     loadSong(index, true, SONG_START_TIMES[index]);
+  }
+
+  function playPageSong() {
+    if (!pageSongLoaded || songIndex !== current.songIndex) {
+      loadSong(current.songIndex, true, SONG_START_TIMES[current.songIndex]);
+      return;
+    }
+    togglePlayback();
   }
 
   function togglePlayback() {
@@ -345,16 +330,22 @@ export default function OnlyYouLetter() {
                 <div className="l4u-paragraphs">
                   {current.paragraphs.map((paragraph, i) => <motion.p key={`${page}-${i}`} initial={reduced ? false : { opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: reduced ? 0 : .16 + i * .13, duration: .45 }}>{paragraph}</motion.p>)}
                 </div>
-                {current.cues.length > 0 && (
-                  <div className="l4u-inline-cues">
-                    {current.cues.map((cue) => (
-                      <div className="l4u-inline-cue" key={cue.id}>
-                        <span>♪</span><em>{cue.text}</em>
-                        <button title={cues[cue.id] === undefined ? "Play song and set this lyric timestamp" : `Play from ${formatTime(cues[cue.id])}`} onClick={() => playCue(cue.id)}><Play size={13} /></button>
-                      </div>
-                    ))}
+                <div className="l4u-letter-player" role="group" aria-label={`Song for this letter: ${pageSong.title}`}>
+                  <span className="l4u-letter-player-art" aria-hidden="true"><Music2 size={17} /></span>
+                  <span className="l4u-letter-player-meta">
+                    <small>THE SONG FOR THIS LETTER</small>
+                    <strong>{pageSong.title}</strong>
+                    <span>{pageSong.artist}</span>
+                  </span>
+                  <button className="l4u-letter-player-button" onClick={playPageSong} aria-label={`${pageSongPlaying ? "Pause" : "Play"} ${pageSong.title}`}>
+                    {pageSongPlaying ? <Pause size={16} /> : <Play size={16} />}
+                  </button>
+                  <div className="l4u-letter-player-timeline">
+                    <input aria-label={`Seek ${pageSong.title}`} type="range" min="0" max={letterDuration || 1} step=".1" value={Math.min(letterTime, letterDuration || 0)} onChange={(event) => seek(Number(event.target.value))} disabled={!pageSongLoaded || !letterDuration} />
+                    <span>{formatTime(pageSongLoaded ? letterTime : SONG_START_TIMES[current.songIndex])}</span>
+                    <span>{formatTime(letterDuration)}</span>
                   </div>
-                )}
+                </div>
                 <div className="l4u-paper-signoff"><span>With love,</span><strong>Me ♡</strong></div>
                 <div className="l4u-paper-flower" aria-hidden="true">✿</div>
               </motion.article>
@@ -375,7 +366,7 @@ export default function OnlyYouLetter() {
         <div className="l4u-music-heading">
           <span className="l4u-section-kicker"><Music2 size={14} /> THE SOUNDTRACK</span>
           <h2>Five songs.<br /><em>One feeling.</em></h2>
-          <p>Play the recording, mark each lyric as it begins, then replay any line with one tap.</p>
+          <p>Each letter has its own song. Listen from its saved cue, or set an exact lyric timestamp below.</p>
         </div>
         <div className="l4u-song-area">
           <div className="l4u-song-list">
@@ -411,7 +402,6 @@ export default function OnlyYouLetter() {
               onCanPlay={() => setAudioError("")}
             />
             {audioError && <p className="l4u-audio-error" role="alert">{audioError}</p>}
-            {audioNotice && <p className="l4u-audio-notice" role="status">{audioNotice}</p>}
             <div className="l4u-audio-controls">
               <button className="l4u-round-play" onClick={togglePlayback} aria-label={playing ? "Pause" : "Play"}>{playing ? <Pause size={18} /> : <Play size={18} />}</button>
               <div className="l4u-timebar">
@@ -440,30 +430,13 @@ export default function OnlyYouLetter() {
             <span className="l4u-player-foot">Your uploaded MP3 files are played locally by this page. Playback begins after you press Play.</span>
           </div>
         </div>
-        <p className="l4u-lyric-note">Timestamp setup is stored in this browser. After setting the cues, lyric play buttons on the letter will jump to those exact saved positions.</p>
+        <p className="l4u-lyric-note">Timestamp setup is stored in this browser. Each letter player starts at its song’s saved cue.</p>
       </section>
 
       <footer className="l4u-footer">
         <span>✿</span><p>And if I ever get to choose…</p><h2>I'll choose <em>you.</em></h2><strong>Every single time. ❤️</strong><small>THE END · BUT NOT THE FEELING</small>
       </footer>
 
-      <aside className={`l4u-mini-player ${playing ? "is-playing" : ""}`} aria-label="Persistent music player">
-        <div className="l4u-mini-disc"><span>♡</span></div>
-        <div className="l4u-mini-meta">
-          <strong>{activeSong.title}</strong>
-          <small>{activeSong.artist}</small>
-        </div>
-        <button className="l4u-mini-toggle" onClick={togglePlayback} aria-label={playing ? "Pause music" : "Play music"}>
-          {playing ? <Pause size={17} /> : <Play size={17} />}
-        </button>
-        <div className="l4u-mini-timeline">
-          <input aria-label="Mini player seek" type="range" min="0" max={duration || 1} step=".1" value={Math.min(currentTime, duration || 0)} onChange={(e) => seek(Number(e.target.value))} />
-          <div><span>{formatTime(currentTime)}</span><span>{formatTime(duration)}</span></div>
-        </div>
-        <button className="l4u-mini-song" onClick={() => document.getElementById("our-songs")?.scrollIntoView({ behavior: "smooth" })} aria-label="Open song list">
-          <Music2 size={16} />
-        </button>
-      </aside>
     </main>
   );
 }
