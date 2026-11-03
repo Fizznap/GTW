@@ -124,11 +124,20 @@ const DEFAULT_CUE_TIMES: Record<string, number> = {
   "tujaane-1": 32,   // Tu Jaane Na — 00:32
 };
 
+// Each track starts at the first known lyric cue, so choosing any song keeps
+// the same intentional, timestamped listening experience.
+const SONG_START_TIMES = [110, 244, 35, 230, 32];
+
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
+function isCurrentTrack(audio: HTMLAudioElement, index: number) {
+  const source = audio.currentSrc || audio.src;
+  return source ? new URL(source, window.location.href).pathname.endsWith(songs[index].src) : false;
 }
 
 export default function OnlyYouLetter() {
@@ -167,8 +176,7 @@ export default function OnlyYouLetter() {
   function applyPendingSeek(audio: HTMLAudioElement) {
     const pending = pendingSeekRef.current;
     if (!pending || audio.readyState < 1) return;
-    const expectedPath = songs[pending.songIndex].src;
-    if (!audio.currentSrc.endsWith(expectedPath)) return;
+    if (!isCurrentTrack(audio, pending.songIndex)) return;
 
     pendingSeekRef.current = null;
     const safeTime = Math.max(0, Math.min(pending.time, Number.isFinite(audio.duration) ? audio.duration : pending.time));
@@ -205,7 +213,7 @@ export default function OnlyYouLetter() {
     if (!audio) return;
 
     const targetPath = target.src;
-    const alreadyLoaded = audio.currentSrc.endsWith(targetPath) && audio.readyState >= 1;
+    const alreadyLoaded = isCurrentTrack(audio, index) && audio.readyState >= 1;
 
     if (alreadyLoaded) {
       audio.pause();
@@ -223,16 +231,18 @@ export default function OnlyYouLetter() {
   }
 
   function playCue(cueId: string) {
-    const time = cues[cueId];
-    if (typeof time === "number") {
+    const exactTime = cues[cueId];
+    const time = typeof exactTime === "number" ? exactTime : SONG_START_TIMES[current.songIndex];
+    if (typeof exactTime === "number") {
       setAudioNotice(`${songs[current.songIndex].title} · starting at ${formatTime(time)}.`);
-      loadSong(current.songIndex, true, time);
     } else {
-      setAudioNotice("This lyric has no timestamp yet. Starting the song from the beginning; use “Set exact lyric timestamps” while it plays to mark this line.");
+      setAudioNotice(`This line has no exact timestamp saved yet. Starting at the song’s opening cue, ${formatTime(time)}. Use “Set exact lyric timestamps” to mark this line.`);
       setShowCalibrator(true);
-      loadSong(current.songIndex, true, 0);
+      loadSong(current.songIndex, true, time);
       window.setTimeout(() => document.getElementById("our-songs")?.scrollIntoView({ behavior: "smooth", block: "center" }), 250);
+      return;
     }
+    loadSong(current.songIndex, true, time);
   }
 
   function markCue(cueId: string) {
@@ -244,7 +254,15 @@ export default function OnlyYouLetter() {
   function selectPage(nextPage: number) {
     setPage(nextPage);
     const targetSong = pages[nextPage].songIndex;
-    if (targetSong !== songIndex) loadSong(targetSong, false, 0);
+    if (targetSong !== songIndex) loadSong(targetSong, false, SONG_START_TIMES[targetSong]);
+  }
+
+  function selectSong(index: number) {
+    if (index === songIndex) {
+      togglePlayback();
+      return;
+    }
+    loadSong(index, true, SONG_START_TIMES[index]);
   }
 
   function togglePlayback() {
@@ -256,8 +274,8 @@ export default function OnlyYouLetter() {
       return;
     }
 
-    if (!audio.currentSrc.endsWith(activeSong.src)) {
-      loadSong(songIndex, true, currentTime);
+    if (!isCurrentTrack(audio, songIndex)) {
+      loadSong(songIndex, true, currentTime || SONG_START_TIMES[songIndex]);
       return;
     }
 
@@ -290,6 +308,13 @@ export default function OnlyYouLetter() {
       </div>
       <motion.div className="l4u-petal l4u-petal-a" aria-hidden="true" animate={reduced ? {} : { y: [0, -18, 0], rotate: [0, 14, 0] }} transition={{ duration: 7, repeat: Infinity }}>✿</motion.div>
       <motion.div className="l4u-petal l4u-petal-b" aria-hidden="true" animate={reduced ? {} : { y: [0, 15, 0], rotate: [0, -18, 0] }} transition={{ duration: 9, repeat: Infinity }}>✿</motion.div>
+      <div className="l4u-flower-character" aria-hidden="true">
+        <div className="l4u-flower-bloom">
+          {Array.from({ length: 8 }, (_, index) => <i key={index} style={{ "--petal": index } as React.CSSProperties} />)}
+          <span className="l4u-flower-face"><i /><i /><b /></span>
+        </div>
+        <span className="l4u-flower-stem"><i /><b /></span>
+      </div>
 
       <header className="l4u-header">
         <a href="/only-you" className="l4u-brand"><Heart size={15} fill="currentColor" /> a letter for you</a>
@@ -355,7 +380,7 @@ export default function OnlyYouLetter() {
         <div className="l4u-song-area">
           <div className="l4u-song-list">
             {songs.map((song, index) => (
-              <button key={song.title} className={`l4u-song-row ${songIndex === index ? "selected" : ""}`} onClick={() => loadSong(index, false, 0)}>
+              <button key={song.title} className={`l4u-song-row ${songIndex === index ? "selected" : ""} ${songIndex === index && playing ? "is-playing" : ""}`} onClick={() => selectSong(index)} aria-pressed={songIndex === index}>
                 <span className="l4u-song-number">0{index + 1}</span>
                 <span className="l4u-song-meta"><strong>{song.title}</strong><small>{song.artist}</small></span>
                 <span className="l4u-song-play">{songIndex === index && playing ? <Pause size={15} /> : <Play size={15} />}</span>
@@ -422,7 +447,7 @@ export default function OnlyYouLetter() {
         <span>✿</span><p>And if I ever get to choose…</p><h2>I'll choose <em>you.</em></h2><strong>Every single time. ❤️</strong><small>THE END · BUT NOT THE FEELING</small>
       </footer>
 
-      <aside className="l4u-mini-player" aria-label="Persistent music player">
+      <aside className={`l4u-mini-player ${playing ? "is-playing" : ""}`} aria-label="Persistent music player">
         <div className="l4u-mini-disc"><span>♡</span></div>
         <div className="l4u-mini-meta">
           <strong>{activeSong.title}</strong>

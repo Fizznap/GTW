@@ -135,3 +135,36 @@
 .l4u-audio-error,.l4u-audio-notice{padding:9px 11px;border-radius:9px;font-size:10px;line-height:1.5;text-align:left;margin:10px 0}
 .l4u-audio-error{background:#ffe3df;color:#8d3434;border:1px solid #e6a7a0}
 .l4u-audio-notice{background:#f5eadb;color:#865a54;border:1px solid #dec4ae}
+
+/* A small flower friend gives the letter a living, hand-made detail. */
+.l4u-flower-character{position:fixed;right:clamp(22px,6vw,88px);bottom:clamp(104px,15vh,150px);z-index:3;width:74px;height:112px;pointer-events:none;filter:drop-shadow(0 5px 10px #533c3b45);animation:l4u-flower-bob 4.8s ease-in-out infinite}
+.l4u-flower-bloom{position:absolute;top:0;left:11px;width:52px;height:52px}
+.l4u-flower-bloom>i{position:absolute;left:19px;top:4px;width:14px;height:24px;border-radius:50% 50% 45% 45%;background:linear-gradient(160deg,#ffe7bc,#eaa2a4);transform-origin:7px 22px;transform:rotate(calc(var(--petal)*45deg));box-shadow:inset 0 1px 3px #fff8d9}
+.l4u-flower-face{position:absolute;inset:13px;border-radius:50%;background:#f6cf88;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:inset 0 2px 3px #fff1bd}
+.l4u-flower-face i{width:3px;height:5px;border-radius:50%;background:#69494b}
+.l4u-flower-face b{position:absolute;left:50%;top:15px;width:7px;height:4px;border-bottom:1px solid #a45e65;border-radius:0 0 7px 7px;transform:translateX(-50%)}
+.l4u-flower-stem{position:absolute;left:35px;top:47px;width:4px;height:57px;border-radius:9px;background:linear-gradient(90deg,#637d57,#91a56b)}
+.l4u-flower-stem i,.l4u-flower-stem b{position:absolute;width:18px;height:9px;border-radius:100% 0 100% 0;background:linear-gradient(135deg,#9aab72,#607b5c)}
+.l4u-flower-stem i{left:-15px;top:17px;transform:rotate(18deg)}.l4u-flower-stem b{left:1px;top:31px;transform:scaleX(-1) rotate(18deg)}
+.l4u-song-row{position:relative;overflow:hidden;min-height:72px;transition:background .25s,border-color .25s,transform .25s,box-shadow .25s}
+.l4u-song-row:focus-visible,.l4u-inline-cue button:focus-visible,.l4u-button:focus-visible,.l4u-round-play:focus-visible,.l4u-mini-player button:focus-visible,.l4u-calibrate-toggle:focus-visible,.l4u-calibration-row button:focus-visible{outline:3px solid #bc7c80;outline-offset:3px}
+.l4u-song-row.selected{border-color:#b86e78;background:#fffdf7;box-shadow:0 10px 26px #8f555414,inset 3px 0 #b86e78}
+.l4u-song-row.is-playing .l4u-song-play{background:#b86e78;color:#fff8ee;box-shadow:0 0 0 5px #b86e781c}
+.l4u-song-play{transition:background .2s,color .2s,box-shadow .2s}
+.l4u-player-card{border-radius:22px;background:linear-gradient(145deg,#fffaf0,#f7ead9);box-shadow:0 22px 50px #7651441c,inset 0 1px #fff}
+.l4u-player-card h3{font-size:28px}
+.l4u-record{border:5px solid #f3e3d1}
+.l4u-round-play{box-shadow:0 5px 14px #59413f35;transition:transform .2s,background .2s}
+.l4u-round-play:hover,.l4u-mini-toggle:hover{transform:scale(1.06);background:#9b5965;color:#fff8ee}
+.l4u-audio-controls input,.l4u-mini-timeline input{accent-color:#b86e78}
+.l4u-inline-cue button{transition:transform .18s,background .18s,color .18s}
+.l4u-inline-cue button:hover{transform:scale(1.08);background:#9b5965;color:#fff8ee}
+.l4u-mini-player{border-color:#fff5e855;background:rgba(65,47,49,.94);box-shadow:0 16px 45px #2d20266b}
+.l4u-mini-disc{animation:l4u-spin 12s linear infinite;animation-play-state:paused}
+.l4u-mini-player.is-playing .l4u-mini-disc{animation-play-state:running}
+.l4u-music-heading p{max-width:46ch;margin:0 auto;line-height:1.75}
+.l4u-lyric-note{line-height:1.7;max-width:65ch;margin:24px auto 0}
+.l4u-footer{background:linear-gradient(180deg,rgba(91,57,61,.83),rgba(50,39,43,.93))}
+@keyframes l4u-flower-bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-9px) rotate(3deg)}}
+@media(max-width:720px){.l4u-flower-character{right:10px;bottom:calc(100px + env(safe-area-inset-bottom,0px));opacity:.76}.l4u-song-row{min-height:68px}.l4u-player-card{border-radius:17px}}
+@media(prefers-reduced-motion:reduce){.l4u-flower-character,.l4u-mini-disc{animation:none!important}}
