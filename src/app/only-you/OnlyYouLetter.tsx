@@ -315,7 +315,7 @@ export default function OnlyYouLetter() {
                   </div>
                   {audioError && <p className="l4u-audio-error" role="alert">{audioError}</p>}
                 </div>
-                <div className="l4u-paper-signoff"><span>With love,</span><strong>Me ♡</strong></div>
+                <div className="l4u-paper-signoff"><span>With love,</span><strong>cbt bbg ♡</strong></div>
                 <div className="l4u-paper-flower" aria-hidden="true">✿</div>
                 </div>
               </motion.article>
