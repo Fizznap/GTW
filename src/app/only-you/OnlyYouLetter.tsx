@@ -258,12 +258,17 @@ export default function OnlyYouLetter() {
       </div>
 
       <header className="l4u-header">
-        <a href="/only-you" className="l4u-brand"><Heart size={15} fill="currentColor" /> a letter for you</a>
+        <a href="/only-you" className="l4u-brand"><span className="l4u-brand-sticker" aria-hidden="true">♡</span> a letter for you</a>
         <span>MADE WITH CARE · 2026</span>
       </header>
 
       {!opened ? (
         <section className="l4u-intro">
+          <div className="l4u-memory-card" aria-hidden="true">
+            <span className="l4u-memory-pin">♡</span>
+            <span className="l4u-memory-image" />
+            <span className="l4u-memory-caption">A little piece of our sky</span>
+          </div>
           <motion.div className="l4u-envelope" initial={reduced ? false : { opacity: 0, y: 35, rotate: -2 }} animate={{ opacity: 1, y: 0, rotate: 0 }} transition={{ duration: .9 }}>
             <span className="l4u-stamp">♡</span>
             <span className="l4u-envelope-small">A NOTE FOR SOMEONE SPECIAL</span>
@@ -280,6 +285,7 @@ export default function OnlyYouLetter() {
           <div className="l4u-letter-wrap">
             <AnimatePresence mode="wait">
               <motion.article key={page} className="l4u-paper" initial={reduced ? false : { opacity: 0, y: 24, rotate: page % 2 ? 1 : -1, scale: .98 }} animate={{ opacity: 1, y: 0, rotate: 0, scale: 1 }} exit={reduced ? undefined : { opacity: 0, y: -14, scale: .99 }} transition={transition}>
+                <div className="l4u-paper-inner">
                 <div className="l4u-paper-top"><span>{current.date}</span><span>{String(page + 1).padStart(2, "0")} / 06</span></div>
                 <div className="l4u-paper-rule" />
                 <h2>{current.salutation}</h2>
@@ -293,7 +299,7 @@ export default function OnlyYouLetter() {
                 )}
                 {current.emphasis && <p className="l4u-final-emphasis">{current.emphasis}</p>}
                 <div className="l4u-letter-player" role="group" aria-label={`Song for this letter: ${pageSong.title}`}>
-                  <span className="l4u-letter-player-art" aria-hidden="true"><Music2 size={17} /></span>
+                  <span className={`l4u-letter-player-art ${pageSongPlaying ? "is-playing" : ""}`} aria-hidden="true"><Music2 size={17} /></span>
                   <span className="l4u-letter-player-meta">
                     <small>THE SONG FOR THIS LETTER</small>
                     <strong>{pageSong.title}</strong>
@@ -311,6 +317,7 @@ export default function OnlyYouLetter() {
                 </div>
                 <div className="l4u-paper-signoff"><span>With love,</span><strong>Me ♡</strong></div>
                 <div className="l4u-paper-flower" aria-hidden="true">✿</div>
+                </div>
               </motion.article>
             </AnimatePresence>
           </div>
