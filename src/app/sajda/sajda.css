@@ -1,0 +1,181 @@
+.sajda-page {
+  --sajda-ink: #292625;
+  --sajda-muted: #77716d;
+  --sajda-rose: #bd7f86;
+  min-height: 100svh;
+  color: var(--sajda-ink);
+  background:
+    radial-gradient(ellipse at 50% 42%, #fff 0%, #fff 34%, transparent 72%),
+    #faf9f7;
+  font-family: var(--font-outfit), sans-serif;
+  overflow: hidden;
+}
+
+.sajda-header {
+  position: relative;
+  z-index: 2;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(20px, 6vw, 88px);
+  border-bottom: 1px solid #ece9e6;
+}
+
+.sajda-wordmark,
+.sajda-back-link {
+  color: #4e4947;
+  text-decoration: none;
+}
+
+.sajda-wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.sajda-wordmark span { color: var(--sajda-rose); font-size: 22px; }
+.sajda-back-link { color: var(--sajda-muted); font-size: 12px; letter-spacing: .03em; }
+.sajda-back-link span { margin-left: 5px; color: var(--sajda-rose); }
+
+.sajda-hero {
+  position: relative;
+  min-height: calc(100svh - 76px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(310px, 410px);
+  align-items: center;
+  gap: clamp(44px, 9vw, 132px);
+  width: min(1130px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 92px 20px 106px;
+}
+
+.sajda-copy { position: relative; z-index: 1; max-width: 570px; animation: sajda-arrive .9s cubic-bezier(.2,.75,.25,1) both; }
+.sajda-eyebrow,
+.sajda-song-kicker {
+  color: #938b86;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+.sajda-eyebrow { display: flex; align-items: center; gap: 9px; }
+.sajda-eyebrow span { color: var(--sajda-rose); font-size: 16px; }
+.sajda-copy h1 {
+  margin-top: 25px;
+  color: #302a28;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(50px, 6.1vw, 82px);
+  font-weight: 400;
+  letter-spacing: -.055em;
+  line-height: .99;
+}
+.sajda-copy h1 em { color: var(--sajda-rose); font-weight: 400; }
+.sajda-message {
+  max-width: 435px;
+  margin-top: 28px;
+  color: #77716d;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1.9;
+}
+.sajda-signoff {
+  margin-top: 27px;
+  color: #605854;
+  font-family: var(--font-caveat), cursive;
+  font-size: 22px;
+}
+.sajda-signoff span { color: var(--sajda-rose); }
+
+.sajda-song {
+  position: relative;
+  z-index: 1;
+  padding: 27px;
+  border: 1px solid #e9e4df;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 91%);
+  box-shadow: 0 22px 70px rgb(73 61 56 / 8%), 0 2px 7px rgb(73 61 56 / 4%);
+  animation: sajda-arrive .9s .12s cubic-bezier(.2,.75,.25,1) both;
+}
+.sajda-song-heading { display: flex; flex-direction: column; padding: 1px 2px 20px; }
+.sajda-song-kicker { font-size: 8px; letter-spacing: .2em; }
+.sajda-song-title {
+  margin-top: 10px;
+  color: #433a37;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 30px;
+  letter-spacing: -.03em;
+}
+.sajda-song-subtitle { margin-top: 5px; color: #938b86; font-size: 11px; }
+.sajda-spotify { display: block; border: 0; border-radius: 3px; background: #f7f5f2; }
+.sajda-open-spotify {
+  display: inline-flex;
+  gap: 6px;
+  margin: 17px 2px 0;
+  color: #746b67;
+  font-size: 10px;
+  text-decoration-color: #d8c4c2;
+  text-underline-offset: 4px;
+}
+.sajda-open-spotify span { color: var(--sajda-rose); }
+.sajda-bottom-note {
+  position: absolute;
+  right: 22px;
+  bottom: 28px;
+  color: #aaa29d;
+  font-size: 8px;
+  letter-spacing: .19em;
+  text-transform: uppercase;
+}
+
+.sajda-orbit {
+  position: absolute;
+  top: 50%;
+  left: 38%;
+  width: min(56vw, 650px);
+  aspect-ratio: 1;
+  border: 1px solid rgb(189 127 134 / 8%);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: sajda-breathe 8s ease-in-out infinite alternate;
+}
+.sajda-orbit-two { width: min(41vw, 475px); border-color: rgb(189 127 134 / 9%); animation-delay: -2.5s; }
+.sajda-orbit-three { width: min(27vw, 310px); border-color: rgb(189 127 134 / 11%); animation-delay: -5s; }
+
+@keyframes sajda-arrive { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes sajda-breathe { from { opacity: .48; scale: .985; } to { opacity: 1; scale: 1.015; } }
+
+@media (max-width: 760px) {
+  .sajda-header { min-height: 64px; padding-inline: 19px; }
+  .sajda-hero {
+    min-height: calc(100svh - 64px);
+    grid-template-columns: 1fr;
+    gap: 34px;
+    width: min(540px, calc(100% - 28px));
+    padding: 76px 9px 72px;
+  }
+  .sajda-copy h1 { margin-top: 20px; font-size: clamp(49px, 12vw, 70px); }
+  .sajda-message { margin-top: 21px; font-size: 16px; }
+  .sajda-signoff { margin-top: 19px; }
+  .sajda-song { padding: 20px; }
+  .sajda-song-heading { padding-bottom: 15px; }
+  .sajda-orbit { top: 17%; left: 83%; width: 75vw; opacity: .65; }
+  .sajda-orbit-two { width: 57vw; }
+  .sajda-orbit-three { width: 39vw; }
+  .sajda-bottom-note { bottom: 18px; right: 10px; }
+}
+
+@media (max-width: 390px) {
+  .sajda-back-link { font-size: 10px; }
+  .sajda-song { padding: 16px; }
+  .sajda-spotify { height: 152px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sajda-copy, .sajda-song, .sajda-orbit { animation: none; }
+}
