@@ -44,13 +44,13 @@ const pages: LetterPage[] = [
     paragraphs: [
       "You know, I always pray to God for just one thing: that someday you will be mine.",
       "I don't know what the future holds, but I really wish I get to spend my life with you.",
-      "Har dua mein tujhko main maangu sada,",
-      "Rab se hai har ghadi bas yahi iltija.",
+      "Main kabhi bhooloonga na tujhe, chahe tu mujhko dena bhula,",
+      "Aadatein jaisi hai tu meri, aadatein kaise bhooloon bhala?",
     ],
-    songIndex: 1,
+    songIndex: 3,
     cues: [
-      { id: "sau-1", text: "Har dua mein tujhko main maangu sada." },
-      { id: "sau-2", text: "Rab se hai har ghadi bas yahi iltija." },
+      { id: "kinna-1", text: "Main kabhi bhooloonga na tujhe, chahe tu mujhko dena bhula." },
+      { id: "kinna-2", text: "Aadatein jaisi hai tu meri, aadatein kaise bhooloon bhala?" },
     ],
   },
   {
@@ -78,13 +78,13 @@ const pages: LetterPage[] = [
     salutation: "Even if someday,",
     paragraphs: [
       "Even if someday you forget me, I don't think I'll ever be able to forget you.",
-      "Main kabhi bhooloonga na tujhe, chahe tu mujhko dena bhula,",
-      "Aadatein jaisi hai tu meri, aadatein kaise bhooloon bhala?",
+      "Har dua mein tujhko main maangu sada,",
+      "Rab se hai har ghadi bas yahi iltija.",
     ],
-    songIndex: 3,
+    songIndex: 1,
     cues: [
-      { id: "kinna-1", text: "Main kabhi bhooloonga na tujhe, chahe tu mujhko dena bhula." },
-      { id: "kinna-2", text: "Aadatein jaisi hai tu meri, aadatein kaise bhooloon bhala?" },
+      { id: "sau-1", text: "Har dua mein tujhko main maangu sada." },
+      { id: "sau-2", text: "Rab se hai har ghadi bas yahi iltija." },
     ],
   },
   {
